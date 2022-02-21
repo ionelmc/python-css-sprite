@@ -67,7 +67,7 @@ setup(
     keywords=[
         # eg: 'keyword1', 'keyword2', 'keyword3',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     install_requires=[
         'pillow',
         'jinja2',
