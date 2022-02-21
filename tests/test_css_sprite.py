@@ -1,4 +1,3 @@
-
 from css_sprite.cli import main
 
 
