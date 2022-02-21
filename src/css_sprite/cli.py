@@ -18,73 +18,73 @@ import argparse
 import pathlib
 import re
 from dataclasses import dataclass
+from functools import partial
 
 import jinja2
 from PIL import Image
 from PIL import ImageColor
+
+from . import __version__
+
+
+@dataclass
+class Grid:
+    width: int
+    height: int
 
 
 def pack_auto(args):
     images = args.image
     width = max(image.size[0] for image in images)
     height = max(image.size[1] for image in images)
-    return pack_to_size(width, height)(args)
+    return pack_fixed(Grid(width, height), args)
 
 
-@dataclass
-class pack_to_size:
-    width: int
-    height: int
+def pack_fixed(grid: Grid, args):
+    images = args.image
+    count = len(images)
+    mode = images[0].mode
+    vertical = args.vertical
+    if vertical:
+        size = grid.width, grid.height * count
+    else:
+        size = grid.width * count, grid.height
 
-    def __call__(self, args):
-        images = args.image
-        count = len(images)
-        mode = images[0].mode
-        vertical = args.vertical
+    output = Image.new(mode, size, args.background)
+    context_images = []
+    context = {
+        'images': context_images,
+        'width': grid.width,
+        'height': grid.height,
+        'output': {
+            'path': args.output,
+            'count': count,
+        },
+    }
+    image: Image
+    for position, image in enumerate(images):
+        x_offset = (grid.width - image.size[0]) // 2
+        y_offset = (grid.height - image.size[1]) // 2
         if vertical:
-            size = self.width, self.height * count
+            x, y = 0, position * grid.height
         else:
-            size = self.width * count, self.height
+            x, y = position * grid.width, 0
+        output.paste(image, (x + x_offset, y + y_offset))
+        context_images.append(
+            {
+                'count': position + 1,
+                'x': x,
+                'y': y,
+                'filename': image.filename,
+                'x_offset': x_offset,
+                'y_offset': y_offset,
+            }
+        )
 
-        output = Image.new(mode, size, args.background)
-        context_images = []
-        context = {
-            'images': context_images,
-            'width': self.width,
-            'height': self.height,
-            'output': {
-                'path': args.output,
-                'count': count,
-            },
-        }
-        image: Image
-        for position, image in enumerate(images):
-            x_offset = (self.width - image.size[0]) // 2
-            y_offset = (self.height - image.size[1]) // 2
-            if vertical:
-                x, y = 0, position * self.height
-            else:
-                x, y = position * self.width, 0
-            output.paste(image, (x + x_offset, y + y_offset))
-            context_images.append(
-                {
-                    'count': position + 1,
-                    'x': x,
-                    'y': y,
-                    'filename': image.filename,
-                    'x_offset': x_offset,
-                    'y_offset': y_offset,
-                }
-            )
+    if args.template:
+        print(args.template.render(context))
 
-        if args.template:
-            print(args.template.render(context))
-
-        return output
-
-
-def parse_image(value):
-    return Image.open(value)
+    return output
 
 
 size_re = re.compile(r'(\d+):(\d+)')
@@ -94,7 +94,7 @@ def parse_grid(value):
     if value == 'auto':
         return pack_auto
     elif m := size_re.fullmatch(value):
-        return pack_to_size(*map(int, m.groups()))
+        return partial(pack_fixed, Grid(*map(int, m.groups())))
     else:
         raise argparse.ArgumentTypeError(f'invalid value: {value!r}')
 
@@ -106,7 +106,7 @@ parser.add_argument(
     'image',
     nargs=argparse.ONE_OR_MORE,
     help="Path to image to include in sprite.",
-    type=parse_image,
+    type=Image.open,
 )
 parser.add_argument(
     '--grid',
@@ -141,9 +141,15 @@ parser.add_argument(
     type=jinja2.Template,
     help="Jinja template for CSS output on stdout.",
 )
+parser.add_argument(
+    '--version',
+    action='version',
+    version=f'%(prog)s {__version__}',
+)
 
 
 def main(args=None):
     args = parser.parse_args(args=args)
+    print(args)
     output = args.grid(args)
     output.save(str(args.output))
