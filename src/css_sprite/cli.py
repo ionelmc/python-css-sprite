@@ -111,7 +111,7 @@ parser.add_argument(
 parser.add_argument(
     '--grid',
     '-g',
-    help="Padding algorithm to use. One of: auto, X:Y.",
+    help="Grid cell size to use. One of: auto, X:Y.",
     type=parse_grid,
     default=pack_auto,
 )
@@ -139,12 +139,11 @@ parser.add_argument(
     '--template',
     '-t',
     type=jinja2.Template,
-    help="Template for CSS to output.",
+    help="Jinja template for CSS output on stdout.",
 )
 
 
 def main(args=None):
     args = parser.parse_args(args=args)
-    print(args)
     output = args.grid(args)
     output.save(str(args.output))
