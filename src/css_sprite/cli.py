@@ -17,18 +17,19 @@ Why does this file exist, and why not put this in __main__?
 import argparse
 import pathlib
 import re
-from dataclasses import dataclass
+import sys
 from functools import partial
+from typing import NamedTuple
 
 import jinja2
 from PIL import Image
 from PIL import ImageColor
+from PIL import ImageMode
 
 from . import __version__
 
 
-@dataclass
-class Grid:
+class Size(NamedTuple):
     width: int
     height: int
 
@@ -37,47 +38,71 @@ def pack_auto(args):
     images = args.image
     width = max(image.size[0] for image in images)
     height = max(image.size[1] for image in images)
-    return pack_fixed(Grid(width, height), args)
+    return pack_fixed(Size(width, height), args)
 
 
-def pack_fixed(grid: Grid, args):
+def pack_fixed(cell_size: Size, args):
     images = args.image
     count = len(images)
-    mode = images[0].mode
+    if args.mode:
+        mode = args.mode
+        if args.verbose:
+            print(f'using forced mode {mode!r}')
+    else:
+        mode = images[0].mode
+        if args.verbose:
+            print(f'using mode {mode!r} from {images[0]} ({images[0].filename}')
     vertical = args.vertical
     if vertical:
-        size = grid.width, grid.height * count
+        grid_size = Size(cell_size.width, cell_size.height * count)
     else:
-        size = grid.width * count, grid.height
+        grid_size = Size(cell_size.width * count, cell_size.height)
 
-    output = Image.new(mode, size, args.background)
+    output: Image = Image.new(mode, grid_size, args.background)
     context_images = []
     context = {
         'images': context_images,
-        'width': grid.width,
-        'height': grid.height,
-        'output': {
-            'path': args.output,
-            'count': count,
+        'grid': {
+            'vertical': args.vertical,
+            'cell': {
+                'size': {
+                    'width': cell_size.width,
+                    'height': cell_size.height,
+                },
+                'count': count,
+            },
+            'size': {
+                'width': grid_size[0],
+                'height': grid_size[1],
+            },
         },
+        'output': args.output,
     }
     image: Image
     for position, image in enumerate(images):
-        x_offset = (grid.width - image.size[0]) // 2
-        y_offset = (grid.height - image.size[1]) // 2
+        x_offset = (cell_size.width - image.size[0]) // 2
+        y_offset = (cell_size.height - image.size[1]) // 2
         if vertical:
-            x, y = 0, position * grid.height
+            x, y = 0, position * cell_size.height
         else:
-            x, y = position * grid.width, 0
+            x, y = position * cell_size.width, 0
         output.paste(image, (x + x_offset, y + y_offset))
         context_images.append(
             {
                 'count': position + 1,
-                'x': x,
-                'y': y,
                 'filename': image.filename,
-                'x_offset': x_offset,
-                'y_offset': y_offset,
+                'position': {
+                    'x': x,
+                    'y': y,
+                },
+                'offset': {
+                    'x': x_offset,
+                    'y': y_offset,
+                },
+                'size': {
+                    'x': image.size[0],
+                    'y': image.size[1],
+                },
             }
         )
 
@@ -94,9 +119,17 @@ def parse_grid(value):
     if value == 'auto':
         return pack_auto
     elif m := size_re.fullmatch(value):
-        return partial(pack_fixed, Grid(*map(int, m.groups())))
+        return partial(pack_fixed, Size(*map(int, m.groups())))
     else:
         raise argparse.ArgumentTypeError(f'invalid value: {value!r}')
+
+
+def parse_mode(value):
+    try:
+        ImageMode.getmode(value)
+    except Exception as exc:
+        raise argparse.ArgumentTypeError(f'invalid value: {value!r} ({exc!r}, acceptable values: {", ".join(ImageMode._modes.keys())})')
+    return value
 
 
 parser = argparse.ArgumentParser(
@@ -123,6 +156,12 @@ parser.add_argument(
     required=True,
 )
 parser.add_argument(
+    '--mode',
+    '-m',
+    type=parse_mode,
+    help="Force a certain image mode in the output, see: https://pillow.readthedocs.io/en/latest/handbook/concepts.html#modes.",
+)
+parser.add_argument(
     '--vertical',
     '-v',
     help="Stack the images vertically (they are stacked horizontally by default).",
@@ -133,13 +172,24 @@ parser.add_argument(
     '-b',
     help="Background.",
     type=ImageColor.getrgb,
-    default=ImageColor.getrgb('#ffffffff'),
+    default=ImageColor.getrgb('#00000000'),
 )
-parser.add_argument(
+template_parser = parser.add_mutually_exclusive_group()
+template_parser.add_argument(
     '--template',
     '-t',
     type=jinja2.Template,
     help="Jinja template for CSS output on stdout.",
+)
+template_parser.add_argument(
+    '--template-path',
+    '-p',
+    type=pathlib.Path,
+    help="Jinja template path for CSS output on stdout.",
+)
+parser.add_argument(
+    '--verbose',
+    action='store_true',
 )
 parser.add_argument(
     '--version',
@@ -149,7 +199,16 @@ parser.add_argument(
 
 
 def main(args=None):
-    args = parser.parse_args(args=args)
-    print(args)
+    args: argparse.Namespace = parser.parse_args(args=args)
+    if args.verbose:
+        print('parsed arguments:', file=sys.stderr)
+        for key, value in args.__dict__.items():
+            if isinstance(value, list):
+                value = "\n    ".join(map(repr, value))
+                print(f'  {key}=[\n    {value}\n  ]', file=sys.stderr)
+            else:
+                print(f'  {key}={value!r}', file=sys.stderr)
     output = args.grid(args)
+    if args.verbose:
+        print(f'writing to: {args.output}', file=sys.stderr)
     output.save(str(args.output))
