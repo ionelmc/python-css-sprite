@@ -170,7 +170,7 @@ parser.add_argument(
 parser.add_argument(
     '--background',
     '-b',
-    help="Background.",
+    help="Background color.",
     type=ImageColor.getrgb,
     default=ImageColor.getrgb('#00000000'),
 )
@@ -190,6 +190,7 @@ template_parser.add_argument(
 parser.add_argument(
     '--verbose',
     action='store_true',
+    help="Make output verbose.",
 )
 parser.add_argument(
     '--version',

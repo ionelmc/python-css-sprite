@@ -15,6 +15,7 @@ Overview
     * - package
       - | |version| |wheel| |supported-versions| |supported-implementations|
         | |commits-since|
+
 .. |docs| image:: https://readthedocs.org/projects/python-css-sprite/badge/?style=flat
     :target: https://python-css-sprite.readthedocs.io/
     :alt: Documentation Status
@@ -55,8 +56,6 @@ Overview
     :alt: Commits since latest release
     :target: https://github.com/ionelmc/python-css-sprite/compare/v0.0.1...main
 
-
-
 .. end-badges
 
 A simple css sprite generator.
@@ -77,7 +76,7 @@ You can also install the in-development version with::
 Usage
 =====
 
-To generate a css sprite from images.::
+To generate a css sprite from images::
 
     css-sprite [-h] [--grid GRID] --output OUTPUT
         [--mode MODE] [--vertical] [--background BACKGROUND]
@@ -97,14 +96,13 @@ Options:
   --mode MODE, -m MODE  Force a certain image mode in the output, see: https://pillow.readthedocs.io/en/latest/handbook/concepts.html#modes.
   --vertical, -v        Stack the images vertically (they are stacked horizontally by default).
   --background BACKGROUND, -b BACKGROUND
-                        Background.
+                        Background color.
   --template TEMPLATE, -t TEMPLATE
                         Jinja template for CSS output on stdout.
   --template-path TEMPLATE_PATH, -p TEMPLATE_PATH
                         Jinja template path for CSS output on stdout.
-  --verbose
+  --verbose             Make output verbose.
   --version             show program's version number and exit
-
 
 
 Documentation
