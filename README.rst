@@ -52,9 +52,9 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/css-sprite
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/python-css-sprite/v0.1.0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/python-css-sprite/v0.1.1.svg
     :alt: Commits since latest release
-    :target: https://github.com/ionelmc/python-css-sprite/compare/v0.1.0...main
+    :target: https://github.com/ionelmc/python-css-sprite/compare/v0.1.1...main
 
 .. end-badges
 
