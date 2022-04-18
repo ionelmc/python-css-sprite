@@ -74,6 +74,38 @@ You can also install the in-development version with::
 
     pip install https://github.com/ionelmc/python-css-sprite/archive/main.zip
 
+Usage
+=====
+
+To generate a css sprite from images.::
+
+    css-sprite [-h] [--grid GRID] --output OUTPUT
+        [--mode MODE] [--vertical] [--background BACKGROUND]
+        [--template TEMPLATE | --template-path TEMPLATE_PATH]
+        [--verbose] [--version] image [image ...]
+
+Output is mainly a new image but you can also generate the accompanying css.
+
+Positional arguments:
+  image                 Path to image to include in sprite.
+
+Options:
+  -h, --help            show this help message and exit
+  --grid GRID, -g GRID  Grid cell size to use. One of: auto, X:Y.
+  --output OUTPUT, -o OUTPUT
+                        Output file.
+  --mode MODE, -m MODE  Force a certain image mode in the output, see: https://pillow.readthedocs.io/en/latest/handbook/concepts.html#modes.
+  --vertical, -v        Stack the images vertically (they are stacked horizontally by default).
+  --background BACKGROUND, -b BACKGROUND
+                        Background.
+  --template TEMPLATE, -t TEMPLATE
+                        Jinja template for CSS output on stdout.
+  --template-path TEMPLATE_PATH, -p TEMPLATE_PATH
+                        Jinja template path for CSS output on stdout.
+  --verbose
+  --version             show program's version number and exit
+
+
 
 Documentation
 =============
