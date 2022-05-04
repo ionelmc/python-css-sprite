@@ -51,7 +51,7 @@ def pack_fixed(cell_size: Size, args):
     else:
         mode = images[0].mode
         if args.verbose:
-            print(f'using mode {mode!r} from {images[0]} ({images[0].filename}')
+            print(f'using mode {mode!r} from {images[0]} ({images[0].filename})')
     vertical = args.vertical
     if vertical:
         grid_size = Size(cell_size.width, cell_size.height * count)
@@ -204,8 +204,8 @@ def main(args=None):
     if args.verbose:
         print('parsed arguments:', file=sys.stderr)
         for key, value in args.__dict__.items():
-            if isinstance(value, list):
-                value = "\n    ".join(map(repr, value))
+            if key == 'image':
+                value = '\n    '.join(f'{item!r} ({item.filename})' for item in value)
                 print(f'  {key}=[\n    {value}\n  ]', file=sys.stderr)
             else:
                 print(f'  {key}={value!r}', file=sys.stderr)
