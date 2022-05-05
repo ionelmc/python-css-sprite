@@ -62,19 +62,15 @@ def pack_fixed(cell_size: Size, args):
     context_images = []
     context = {
         'images': context_images,
+        'cell': {
+            'width': cell_size.width,
+            'height': cell_size.height,
+            'count': count,
+        },
         'grid': {
             'vertical': args.vertical,
-            'cell': {
-                'size': {
-                    'width': cell_size.width,
-                    'height': cell_size.height,
-                },
-                'count': count,
-            },
-            'size': {
-                'width': grid_size[0],
-                'height': grid_size[1],
-            },
+            'width': grid_size[0],
+            'height': grid_size[1],
         },
         'output': args.output,
     }
@@ -89,7 +85,8 @@ def pack_fixed(cell_size: Size, args):
         output.alpha_composite(image.convert(mode), (x + x_offset, y + y_offset))
         context_images.append(
             {
-                'count': position + 1,
+                'index': position + 1,
+                'index0': position,
                 'filename': image.filename,
                 'position': {
                     'x': x,
@@ -99,10 +96,8 @@ def pack_fixed(cell_size: Size, args):
                     'x': x_offset,
                     'y': y_offset,
                 },
-                'size': {
-                    'x': image.size[0],
-                    'y': image.size[1],
-                },
+                'width': image.size[0],
+                'height': image.size[1],
             }
         )
 

@@ -105,6 +105,29 @@ Options:
   --version             show program's version number and exit
 
 
+Template variables:
+
+* ``images`` - list of dicts with fields:
+
+  * ``index`` - counter starting from 1
+  * ``index0`` - counter starting from 0
+  * ``filename`` - path to source image
+  * ``offset`` - dict with fields: ``x`` and ``y`` (integers)
+  * ``position`` - dict with fields: ``x`` and ``y`` (integers)
+  * ``width`` - integer (same as ``cell.width`` for now)
+  * ``height`` - integer (same as ``cell.height`` for now)
+* ``grid`` - dict with fields
+
+  * ``width`` - integer
+  * ``height`` - integer
+  * ``vertical`` - bool (``True`` if you have used ``--vertical``)
+* ``cell`` - dict with fields:
+
+  * ``count`` - number of input images
+  * ``width`` - integer
+  * ``height`` - integer
+* ``output`` - pathlib.Path of output file
+
 Documentation
 =============
 
