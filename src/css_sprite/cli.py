@@ -86,7 +86,7 @@ def pack_fixed(cell_size: Size, args):
             x, y = 0, position * cell_size.height
         else:
             x, y = position * cell_size.width, 0
-        output.alpha_composite(image, (x + x_offset, y + y_offset))
+        output.alpha_composite(image.convert(mode), (x + x_offset, y + y_offset))
         context_images.append(
             {
                 'count': position + 1,
