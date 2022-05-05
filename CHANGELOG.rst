@@ -2,6 +2,12 @@
 Changelog
 =========
 
+0.2.0 (2022-05-05)
+------------------
+
+* Allow images to overlap by using alpha composition. Useful when cell is smaller than images, and images are transparent.
+* Restructure template context. **BACKWARDS INCOMPATIBLE**
+
 0.1.1 (2022-04-18)
 ------------------
 
