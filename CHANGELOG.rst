@@ -2,7 +2,7 @@
 Changelog
 =========
 
-0.2.0 (2022-05-05)
+0.2.0 (2022-05-06)
 ------------------
 
 * Allow images to overlap by using alpha composition. Useful when cell is smaller than images, and images are transparent.
